@@ -67,7 +67,7 @@ const SignInForm = () => {
             isLoading: false,
             autoClose: 3000,
           });
-          router.push("/admin/books");
+          router.push("/admin/books/add");
         } else {
           router.push("/dashboard/home");
         }
