@@ -84,8 +84,7 @@ const addBookSchema = zod.object({
     .max(255, "Booking price can't be more than 255"),
   isbn: zod
     .string()
-    .min(1, "Id is required")
-    .max(255, "Id can't be more than 255"),
+    .regex(/^.{13}$/, { message: "Must be exactly 13 characters" }),
 });
 
 const AddBookForm = ({ categories }: { categories: Category[] }) => {
@@ -105,6 +104,7 @@ const AddBookForm = ({ categories }: { categories: Category[] }) => {
         {
           headers: {
             Authorization: `Bearer ${userInfo.access_token}`,
+            "Content-Type": "multipart/form-data"
           },
         }
       );

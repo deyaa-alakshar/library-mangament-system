@@ -1,32 +1,12 @@
 import Image from "next/image";
-import React, { cache } from "react";
+import React from "react";
 import Logo from "../public/Logo.png";
 import { Box, Button, Container, Flex, Grid, Text } from "@radix-ui/themes";
 import Search from "./components/search";
 import NavbarList from "./components/navbarList";
 import NavbarIcons from "./components/navbarIcons";
-import { FaPhone } from "react-icons/fa6";
-import axios from "axios";
-import { cookies } from "next/headers";
 
-interface category {
-  id: number;
-  name: string;
-  is_active: boolean;
-}
-const cookie = cookies();
-const userInfo = JSON.parse(cookie.get("userInfo")?.value!);
-
-const fetchCategory = cache(() =>
-  axios.get(`${process.env.NEXT_PUBLIC_URL}/categories`, {
-    headers: {
-      Authorization: `Bearer ${userInfo.access_token}`,
-    },
-  })
-);
 const Navbar = async () => {
-  const categories = fetchCategory();
-
   return (
     <>
       <Box className="border-b border-solid border-b-#937DC2">
@@ -46,22 +26,11 @@ const Navbar = async () => {
                 </Text>
               </Flex>
             </div>
-            <div className="block lg:hidden">
-              <button className="flex items-center px-3 py-2 border rounded text-zinc-800 border-zinc-900 hover:text-black hover:border-black">
-                <svg
-                  className="fill-current h-3 w-3"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <title>Menu</title>
-                  <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
-                </svg>
-              </button>
-            </div>
+
             <div className="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
               <div className="text-sm lg:flex-grow">
                 {" "}
-                <div className="md:flex my-3 gap-x-8">
+                <div className="md:flex my-3 gap-x-8 items-center">
                   <Search />
                   <NavbarList />
                   <NavbarIcons />
@@ -72,7 +41,7 @@ const Navbar = async () => {
         </Container>
       </Box>
 
-      <nav className="border-b-2 border-solid border-#937DC299 p-2">
+      {/* <nav className="border-b-2 border-solid border-#937DC299 p-2">
         <Container>
           <Grid columns={{ initial: "1", md: "2" }} align="center" gap="2">
             <Box>
@@ -103,7 +72,7 @@ const Navbar = async () => {
             </Box>
           </Grid>
         </Container>
-      </nav>
+      </nav> */}
     </>
   );
 };

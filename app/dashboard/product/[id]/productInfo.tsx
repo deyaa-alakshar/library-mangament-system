@@ -1,82 +1,98 @@
 "use client";
 import { Button, Flex, IconButton, Text } from "@radix-ui/themes";
-import React from "react";
-import { Rating } from "react-simple-star-rating";
+import React, { useCallback, useState } from "react";
 import { LuMinus } from "react-icons/lu";
 import { LuPlus } from "react-icons/lu";
+import { Book } from "./productDetails";
+import { Form, Formik } from "formik";
+import Cookies from "js-cookie";
+import BorrowDialog from "./borrowDialog";
+import { toast } from "react-toastify";
 
-const ProductInfo = () => {
+interface CartItem extends Book {
+  quantity: number;
+}
+
+const ProductInfo = ({ book }: { book: Book }) => {
+  const [quantity, setQuantity] = useState<number>(1);
+
+  const handleAddToCart = useCallback(() => {
+    // Get the existing cart from cookies or initialize an empty array
+    const cart = Cookies.get("cart")
+      ? (JSON.parse(Cookies.get("cart") as string) as CartItem[])
+      : [];
+
+    // Check if the item is already in the cart
+    const existingItemIndex = cart.findIndex(
+      (cartItem) => cartItem.id === book.id
+    );
+
+    if (existingItemIndex > -1) {
+      // If the item exists, update the quantity
+      cart[existingItemIndex].quantity += quantity;
+    } else {
+      // If the item doesn't exist, add it to the cart
+      const item = { ...book, quantity: quantity };
+      cart.push(item);
+    }
+
+    // Save the updated cart back to the cookies
+    Cookies.set("cart", JSON.stringify(cart), { expires: 7 }); // Expires in 7 days
+
+    toast.success("Added to cart successfully", {
+      position: "bottom-left",
+    });
+  }, [quantity]);
+
   return (
-    <Flex direction={"column"} gap={"4"} my={"4"}>
+    <Flex direction={"column"} justify={"center"} gap={"2"} my={"4"}>
       <Text size={"4"} className="text-zinc-900 font-semibold">
         {" "}
-        Chain of Gold: The Last Hours #1
+        {book.title}
       </Text>
-      <Text size={"2"} className="text-zinc-900 font-semibold">
-        {" "}
-        Cassandra Clare
-      </Text>
-      <Rating readonly initialValue={2.4} className="inline" />
       <Text size={"3"} className="text-zinc-900 font-semibold">
-        $12.49
+        {" "}
+        {book.author}
       </Text>
       <Text size={"2"} className="text-zinc-500 font-medium">
-        From #1 New York Times and USA TODAY bestselling author Cassandra Clare
-        comes the first novel in a brand-new trilogy where evil hides in plain
-        sight and love cuts deeper than any blade. Chain of Gold is a
-        Shadowhunters novel.
+        {book.category.name}
+      </Text>
+      <Text size={"3"} className="text-zinc-900 font-semibold">
+        $ {book.price * quantity}
       </Text>
       <Flex gapX={"4"}>
-        <IconButton variant="outline" radius="full">
+        <IconButton
+          type="button"
+          onClick={() => (quantity > 0 ? setQuantity(quantity - 1) : null)}
+          variant="outline"
+          radius="full"
+        >
           <LuMinus width="18" height="18" />
         </IconButton>
         <Text size={"3"} className="text-zinc-900 font-semibold">
-          $12.49
+          {quantity}
         </Text>
-        <IconButton variant="outline" radius="full">
+        <IconButton
+          type="button"
+          onClick={() => setQuantity(quantity + 1)}
+          variant="outline"
+          radius="full"
+        >
           <LuPlus width="18" height="18" />
         </IconButton>
       </Flex>
       <Flex gapX={"4"} justify={"between"}>
-        <Button style={{ flexGrow: "1" }} size={"4"} variant={"solid"}>
+        <Button
+          type="button"
+          style={{ flexGrow: "1" }}
+          size={"4"}
+          variant={"solid"}
+          className="cursor-pointer"
+          onClick={handleAddToCart}
+        >
           Add to cart
         </Button>
-        <Button style={{ flexGrow: "1" }} size={"4"} variant={"outline"}>
-          Borrow
-        </Button>
-      </Flex>
-      <div className="border-b-2 border-#937DC299 border-solid my-4"></div>
-      <Flex direction={"column"} gapY={"4"}>
-        <Flex justify={"between"}>
-          <Flex gapX={"2"}>
-            <Text color="purple">Publisher :</Text>
-            <Text mx={"2"}>Margaret K. Books</Text>
-          </Flex>
-          <Flex gapX={"2"}>
-            <Text color="purple">Publication date :</Text>
-            <Text mx={"2"}>March 3, 2020</Text>
-          </Flex>
-        </Flex>
-        <Flex justify={"between"}>
-          <Flex gapX={"2"}>
-            <Text color="purple">Language :</Text>
-            <Text mx={"2"}>English</Text>
-          </Flex>
-          <Flex gapX={"2"}>
-            <Text color="purple">Reading age :</Text>
-            <Text mx={"2"}>March 3, 2020</Text>
-          </Flex>
-        </Flex>
-        <Flex justify={"between"}>
-          <Flex gapX={"2"}>
-            <Text color="purple">Print length :</Text>
-            <Text mx={"2"}>592 pages</Text>
-          </Flex>
-          <Flex gapX={"2"}>
-            <Text color="purple">Dimensions :</Text>
-            <Text mx={"2"}>6 x 1.8 x 9 inches</Text>
-          </Flex>
-        </Flex>
+        <BorrowDialog book={book} />
       </Flex>
     </Flex>
   );

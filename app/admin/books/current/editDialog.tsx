@@ -71,10 +71,7 @@ const addBookSchema = zod.object({
       message: "File size should be 5MB or less",
     }),
 
-  available_copies: zod
-    .string()
-    .min(1, "Number of copies is required")
-    .max(255, "Id can't be more than 255"),
+  available_copies: zod.number().int().min(1, "Available copies is required"),
   price: zod.string().min(1, "Price is required"),
   booking_price: zod
     .string()
@@ -82,8 +79,7 @@ const addBookSchema = zod.object({
     .max(255, "Booking price can't be more than 255"),
   isbn: zod
     .string()
-    .min(1, "Id is required")
-    .max(255, "Id can't be more than 255"),
+    .regex(/^.{13}$/, { message: "Must be exactly 13 characters" }),
 });
 
 const EditDialog = ({
@@ -95,10 +91,13 @@ const EditDialog = ({
   refetch: () => void;
   categories: Category[];
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleSubmit = async (values: Book) => {
+    setIsLoading(false);
+    setIsOpen(false);
+
     const loadingToastId = toast.loading("Loading data...", {
       position: "bottom-left",
     });
@@ -106,20 +105,19 @@ const EditDialog = ({
     try {
       setIsLoading(true);
       const userInfo = JSON.parse(Cookies.get("userInfo")!);
-      const promise = await axios.post(
+      const promise = await axios.patch(
         `${process.env.NEXT_PUBLIC_URL}/books/${values.id}`,
         values,
         {
           headers: {
             Authorization: `Bearer ${userInfo.access_token}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
       if (promise.status === 200) {
-        setIsLoading(false);
-
         toast.update(loadingToastId, {
-          render: "Book added successfuly",
+          render: "The book has been modified successfully",
           type: "success",
           isLoading: false,
           autoClose: 3000,
@@ -137,8 +135,6 @@ const EditDialog = ({
       });
     }
   };
-
-  console.log(book);
 
   return (
     <Formik
@@ -221,7 +217,6 @@ const EditDialog = ({
                           setFieldValue("category_id", parseInt(value));
                         }}
                         value={values.category_id.toString()}
-                        defaultValue="1"
                       >
                         <Select.Trigger
                           style={{ width: "100%" }}
@@ -291,7 +286,7 @@ const EditDialog = ({
                         setFieldValue("available_copies", e.target.value)
                       }
                       size={"3"}
-                      value={values.available_copies}
+                      value={values.available_copies.toString()}
                     />
                     {errors.available_copies && touched.available_copies ? (
                       <ErrorMessage>{errors.available_copies}</ErrorMessage>
@@ -302,6 +297,7 @@ const EditDialog = ({
                 </Grid>
                 <MyDropzone
                   onFilesSelected={(file) => setFieldValue("image", file[0])}
+                  src={"https://svu-pr1.somar-kesen.com" + book.image}
                 />
                 <Grid columns={{ initial: "1", md: "2" }} gapY={"4"} gapX={"4"}>
                   {" "}
@@ -372,6 +368,7 @@ const EditDialog = ({
                     variant="solid"
                     disabled={isLoading}
                     className="my-4 cursor-pointer"
+                    onClick={submitForm}
                   >
                     Add
                   </Button>

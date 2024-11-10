@@ -1,9 +1,10 @@
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
 interface FileDropzoneProps {
   onFilesSelected: (files: File[]) => void;
+  src?: string;
 }
 
 interface FilePreview {
@@ -11,7 +12,7 @@ interface FilePreview {
   preview: string;
 }
 
-const MyDropzone: React.FC<FileDropzoneProps> = ({ onFilesSelected }) => {
+const MyDropzone: React.FC<FileDropzoneProps> = ({ onFilesSelected, src }) => {
   const [previews, setPreviews] = useState<FilePreview[]>([]);
   // Handle file drop
   const onDrop = useCallback(
@@ -34,6 +35,18 @@ const MyDropzone: React.FC<FileDropzoneProps> = ({ onFilesSelected }) => {
       "image/gif": [],
     },
   });
+
+  useEffect(() => {
+    if (src) {
+      setPreviews((prev) => [
+        ...prev,
+        {
+          file: { name: "Existing Image", type: "image" } as File,
+          preview: src,
+        },
+      ]);
+    }
+  }, [src]);
 
   return (
     <div

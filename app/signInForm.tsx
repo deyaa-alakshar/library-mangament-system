@@ -69,6 +69,12 @@ const SignInForm = () => {
           });
           router.push("/admin/books/add");
         } else {
+          toast.update(loadingToastId, {
+            render: "Welcome back",
+            type: "success",
+            isLoading: false,
+            autoClose: 3000,
+          });
           router.push("/dashboard/home");
         }
       }
