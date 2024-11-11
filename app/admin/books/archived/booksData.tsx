@@ -43,7 +43,7 @@ const UsersData = () => {
   return (
     <Flex className="w-10/12" direction={"column"} gapY={"4"} py={"2"}>
       <Text size={"8"} className="text-zinc-900 font-semibold">
-        Manage books
+        Manage archived books
       </Text>
       <div className="flex flex-col md:flex-row justify-between gap-2">
         <Box className="flex-grow">

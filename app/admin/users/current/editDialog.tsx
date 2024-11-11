@@ -109,9 +109,9 @@ const EditDialog = ({ user, refetch }: { user: User; refetch: () => void }) => {
             </IconButton>
 
             <Dialog.Content maxWidth="450px">
-              <Dialog.Title> Add user</Dialog.Title>
+              <Dialog.Title> Edit user</Dialog.Title>
               <Dialog.Description size="2" mb="4">
-                Add a new user
+                Edit user information
               </Dialog.Description>
 
               <Flex direction="column" gap="3">

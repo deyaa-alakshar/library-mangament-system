@@ -165,7 +165,7 @@ const EditDialog = ({
               <Flex direction={"column"} gapY={"4"} py={"2"}>
                 {" "}
                 <Text size={"8"} className="text-zinc-900 font-semibold">
-                  Add a book
+                  Edit book
                 </Text>
                 <Grid columns={{ initial: "1", md: "2" }} gapY={"4"} gapX={"4"}>
                   <Box>
@@ -370,7 +370,7 @@ const EditDialog = ({
                     className="my-4 cursor-pointer"
                     onClick={submitForm}
                   >
-                    Add
+                    Save
                   </Button>
                 </Grid>
               </Flex>

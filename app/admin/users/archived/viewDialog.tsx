@@ -25,7 +25,7 @@ const ViewDialog = ({ user }: { user: User }) => {
         </IconButton>
       </Dialog.Trigger>
 
-      <Dialog.Content>
+      <Dialog.Content maxWidth={"800px"}>
         <Dialog.Title>View user</Dialog.Title>
         <Dialog.Description size="2" mb="4">
           Showing information about the user.
