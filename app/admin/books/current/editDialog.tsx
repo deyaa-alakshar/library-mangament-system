@@ -69,8 +69,7 @@ const addBookSchema = zod.object({
     .refine((file) => file.size <= 5 * 1024 * 1024, {
       // 5MB limit
       message: "File size should be 5MB or less",
-    }),
-
+    }).optional(),
   available_copies: zod.number().int().min(1, "Available copies is required"),
   price: zod.string().min(1, "Price is required"),
   booking_price: zod

@@ -10,6 +10,8 @@ import { useRouter } from "next/navigation";
 const Carousel = ({ books }: { books: Books }) => {
   const router = useRouter();
 
+  console.log(books)
+
   return (
     <Swiper
       pagination={{
@@ -38,7 +40,7 @@ const Carousel = ({ books }: { books: Books }) => {
                 {book.author}
               </Text>
               <Text size={"3"} className="text-zinc-800 w-1/2 text-start">
-                {book.category.name}
+                {book.category?.name}
               </Text>
               <div className="text-start">
                 {" "}
