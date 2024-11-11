@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Loading from "./loading";
+import PaginationControls from "@/app/components/pagination";
 
 export interface Category {
   id: number;
@@ -15,11 +16,21 @@ export interface Category {
   is_active: number;
 }
 
-const fetchCategories = async () => {
+interface Response {
+  data: Category[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    total_pages: number;
+  };
+}
+
+const fetchCategories = async (page: number) => {
   const userInfo = JSON.parse(Cookies.get("userInfo")!);
 
   const response = await axios.get(
-    `${process.env.NEXT_PUBLIC_URL}/categories`,
+    `${process.env.NEXT_PUBLIC_URL}/categories?page=${page}`,
     {
       headers: {
         Authorization: `Bearer ${userInfo.access_token}`,
@@ -30,15 +41,20 @@ const fetchCategories = async () => {
 };
 
 const CategoriesData = () => {
-  const { data, isLoading, refetch } = useQuery<{ data: Category[] }, Error>({
-    queryKey: ["categories"],
-    queryFn: fetchCategories,
-  });
+  const [search, setSearch] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
 
-  const [search, setSearch] = useState("");
+  const { data, isLoading, refetch } = useQuery<Response, Error>({
+    queryKey: ["categories", page],
+    queryFn: () => fetchCategories(page),
+  });
 
   const handleRefetch = () => {
     refetch();
+  };
+
+  const handlePage = (page: number) => {
+    setPage(page);
   };
 
   let filterd = data?.data.filter((category) =>
@@ -73,6 +89,11 @@ const CategoriesData = () => {
         <AddDialog />
       </div>
       <CategoriesTable categories={filterd} refetch={handleRefetch} />
+      <PaginationControls
+        setPage={handlePage}
+        currentPage={page}
+        totalPages={data?.pagination.total_pages!}
+      />
     </Flex>
   );
 };

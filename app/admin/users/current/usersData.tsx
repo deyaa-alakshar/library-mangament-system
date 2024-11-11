@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Loading from "./loading";
+import PaginationControls from "@/app/components/pagination";
 
 export interface User {
   id: number;
@@ -22,7 +23,18 @@ export interface User {
   password: string;
 }
 
-const fetchCategories = async (page: string) => {
+
+interface Response {
+  data: User[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    total_pages: number;
+  };
+}
+
+const fetchUsers = async (page: number) => {
   const userInfo = JSON.parse(Cookies.get("userInfo")!);
 
   const response = await axios.get(
@@ -37,18 +49,22 @@ const fetchCategories = async (page: string) => {
 };
 
 const UsersData = () => {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState("1");
+  const [search, setSearch] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
 
-  const { data, isLoading, refetch } = useQuery<{ data: User[] }, Error>({
+  const { data, isLoading, refetch } = useQuery<Response, Error>({
     queryKey: ["users", page],
-    queryFn: () => fetchCategories(page),
+    queryFn: () => fetchUsers(page),
   });
 
   let filterd = data?.data.filter((user) => user.name.includes(search || ""));
 
   const handleRefetch = () => {
     refetch();
+  };
+
+  const handlePage = (page: number) => {
+    setPage(page);
   };
 
   if (isLoading) {
@@ -79,6 +95,11 @@ const UsersData = () => {
         <AddDialog refetch={handleRefetch} />
       </div>
       <UsersTable Users={filterd} refetch={handleRefetch} />
+      <PaginationControls
+        setPage={handlePage}
+        currentPage={page}
+        totalPages={data?.pagination.total_pages!}
+      />
     </Flex>
   );
 };

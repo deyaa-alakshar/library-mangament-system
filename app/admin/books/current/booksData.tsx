@@ -8,6 +8,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import Loading from "./loading";
 import { useRouter } from "next/navigation";
+import PaginationControls from "@/app/components/pagination";
 
 export interface Book {
   id: number;
@@ -33,34 +34,58 @@ export interface Book {
   };
 }
 
+interface Response {
+  data: Book[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    total_pages: number;
+  };
+}
+
 export interface Category {
   id: number;
   name: string;
   is_active: number;
 }
 
-
-const fetchBooks = async () => {
+const fetchBooks = async (page: number) => {
   const userInfo = JSON.parse(Cookies.get("userInfo")!);
 
-  const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}/books`, {
-    headers: {
-      Authorization: `Bearer ${userInfo.access_token}`,
-    },
-  });
+  const response = await axios.get(
+    `${process.env.NEXT_PUBLIC_URL}/books?page=${page}`,
+    {
+      headers: {
+        Authorization: `Bearer ${userInfo.access_token}`,
+      },
+    }
+  );
   return response.data;
 };
 
-const UsersData = ({categories}: {categories: Category[]}) => {
-  const [search, setSearch] = useState("");
+const UsersData = ({ categories }: { categories: Category[] }) => {
+  const [search, setSearch] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
   const router = useRouter();
 
-  const { data, isLoading, refetch } = useQuery<{ data: Book[] }, Error>({
-    queryKey: ["books"],
-    queryFn: fetchBooks,
+  const { data, isLoading, refetch } = useQuery<Response, Error>({
+    queryKey: ["books", page],
+    queryFn: () => fetchBooks(page),
   });
 
-  let filterd = data?.data.filter((book) => book.title.includes(search || ""));
+  const pages = Array.from(
+    { length: data?.pagination.total_pages! },
+    (_, index) => index + 1
+  );
+  {
+  }
+
+  let filterd = data?.data?.filter((book) => book.title.includes(search || ""));
+
+  const handlePage = (page: number) => {
+    setPage(page);
+  };
 
   const handleRefetch = () => {
     refetch();
@@ -99,7 +124,13 @@ const UsersData = ({categories}: {categories: Category[]}) => {
           Add book
         </Button>
       </div>
-      <BooksTable books={filterd} refetch={handleRefetch} categories={categories} />
+      <BooksTable
+        books={filterd}
+        refetch={handleRefetch}
+        categories={categories}
+      />
+
+      <PaginationControls setPage={handlePage} currentPage={page} totalPages={data?.pagination.total_pages!} />
     </Flex>
   );
 };

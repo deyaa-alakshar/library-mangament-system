@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Loading from "./loading";
+import PaginationControls from "@/app/components/pagination";
 
 export interface Reserved {
   id: number;
@@ -48,26 +49,34 @@ export interface Reserved {
   };
 }
 
-const reservedBooks = async () => {
+interface Response {
+  data: Reserved[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    total_pages: number;
+  };
+}
+
+const reservedBooks = async (page: number) => {
   const userInfo = JSON.parse(Cookies.get("userInfo")!);
 
-  const response = await axios.get(
-    `${process.env.NEXT_PUBLIC_URL}/bookings`,
-    {
-      headers: {
-        Authorization: `Bearer ${userInfo.access_token}`,
-      },
-    }
-  );
+  const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}/bookings?page=${page}`, {
+    headers: {
+      Authorization: `Bearer ${userInfo.access_token}`,
+    },
+  });
   return response.data;
 };
 
 const ReservedData = () => {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
 
-  const { data, isLoading, refetch } = useQuery<{ data: Reserved[] }, Error>({
-    queryKey: ["reservedBooks"],
-    queryFn: reservedBooks,
+  const { data, isLoading, refetch } = useQuery<Response, Error>({
+    queryKey: ["reservedBooks", page],
+    queryFn: () => reservedBooks(page),
   });
 
   let filterd = data?.data.filter(
@@ -75,6 +84,10 @@ const ReservedData = () => {
       reserved.user.name.includes(search || "") ||
       reserved.book.title.includes(search || "")
   );
+
+  const handlePage = (page: number) => {
+    setPage(page);
+  };
 
   const handleRefetch = () => {
     refetch();
@@ -107,6 +120,12 @@ const ReservedData = () => {
         </Box>
       </div>
       <ReservedTable reserveds={filterd} refetch={handleRefetch} />
+
+      <PaginationControls
+        setPage={handlePage}
+        currentPage={page}
+        totalPages={data?.pagination.total_pages!}
+      />
     </Flex>
   );
 };

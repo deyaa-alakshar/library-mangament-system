@@ -1,26 +1,8 @@
 import { Table } from "@radix-ui/themes";
 import React from "react";
 import BookComponant from "./book";
+import { Book } from "./booksData";
 
-export interface Book {
-  id: number;
-  image: string;
-  category_id: 11;
-  title: string;
-  author: string;
-  available_copies: number;
-  price: number;
-  booking_price: number;
-  is_active: number;
-  isbn: number;
-  deleted_at: Date | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-  category: {
-    id: number;
-    name: string;
-  };
-}
 
 const BooksTable = ({
   books,

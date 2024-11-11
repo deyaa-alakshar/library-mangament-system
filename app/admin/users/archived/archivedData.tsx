@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Loading from "./loading";
+import PaginationControls from "@/app/components/pagination";
 
 export interface User {
   id: number;
@@ -21,11 +22,21 @@ export interface User {
   password: string;
 }
 
-const fetchUsers = async () => {
+interface Response {
+  data: User[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    total_pages: number;
+  };
+}
+
+const fetchUsers = async (page: number) => {
   const userInfo = JSON.parse(Cookies.get("userInfo")!);
 
   const response = await axios.get(
-    `${process.env.NEXT_PUBLIC_URL}/archived-users`,
+    `${process.env.NEXT_PUBLIC_URL}/archived-users?page=${page}`,
     {
       headers: {
         Authorization: `Bearer ${userInfo.access_token}`,
@@ -36,14 +47,19 @@ const fetchUsers = async () => {
 };
 
 const ArchivedData = () => {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
 
-  const { data, isLoading, refetch } = useQuery<{ data: User[] }, Error>({
-    queryKey: ["archivedUsers"],
-    queryFn: fetchUsers,
+  const { data, isLoading, refetch } = useQuery<Response, Error>({
+    queryKey: ["archivedUsers", page],
+    queryFn: () => fetchUsers(page),
   });
 
   let filterd = data?.data.filter((user) => user.name.includes(search || ""));
+
+  const handlePage = (page: number) => {
+    setPage(page);
+  };
 
   const handleRefetch = () => {
     refetch();
@@ -76,6 +92,11 @@ const ArchivedData = () => {
         </Box>
       </div>
       <ArchivedTable Users={filterd} refetch={handleRefetch} />
+      <PaginationControls
+        setPage={handlePage}
+        currentPage={page}
+        totalPages={data?.pagination.total_pages!}
+      />
     </Flex>
   );
 };
