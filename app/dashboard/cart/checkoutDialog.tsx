@@ -73,7 +73,7 @@ const CheckoutDialog = ({ basket }: { basket: Book[] }) => {
         onClick={() =>
           basket.length > 0
             ? setIsOpen(true)
-            : toast.info("Your fucking basket is fucking empty bro fuck off", { position: "bottom-left" })
+            : toast.info("Your basket is empty", { position: "bottom-left" })
         }
       >
         Procced to Chekout
